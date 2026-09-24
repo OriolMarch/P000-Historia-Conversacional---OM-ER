@@ -72,14 +72,24 @@ public class Main {
     zones[9] = esclusa;
     zones[10] = motors;
 
-    
+    connectar(dormitoris, "Nord", passadis, "Sud");
+    connectar(dormitoris, "sud", esclusa, "Nord");
 
 
 
-        
 
-        
-    
+
+
+
+
+
+ jugador = new Jugador("Bond", dormitoris);
+
+    }
+
+    public void connectar(Zona a, String direccioAB,Zona b, String direccioBA){
+        a.afegirSortida(direccioAB,b);
+        b.afegirSortida(direccioBA,a);
     }
 
     public void mostrarIntroduccio(){
