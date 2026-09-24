@@ -74,13 +74,14 @@ public class Main {
 
     connectar(dormitoris, "Nord", passadis, "Sud");
     connectar(dormitoris, "sud", esclusa, "Nord");
-
-
-
-
-
-
-
+    connectar(passadis, "nord", oficina, "sud");
+    connectar(passadis, "est", cuina, "oest");
+    connectar(passadis, "oest", taller, "est");
+    connectar(oficina,"nord",comandaments, "sud");
+    connectar(oficina, "oest",vestuaris,"est");
+    connectar(oficina, "EST", infermeria, "OEST");
+    connectar(cuina, "EST", magatzem, "OEST");
+    connectar(esclusa, "SUD", motors, "NORD");
 
 
  jugador = new Jugador("Bond", dormitoris);
