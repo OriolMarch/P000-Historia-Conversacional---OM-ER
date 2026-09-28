@@ -72,13 +72,13 @@ public class Main {
                 zones[9] = esclusa;
                 zones[10] = motors;
 
-                connectar(dormitoris, "Nord", passadis, "Sud");
-                connectar(dormitoris, "sud", esclusa, "Nord");
-                connectar(passadis, "nord", oficina, "sud");
-                connectar(passadis, "est", cuina, "oest");
-                connectar(passadis, "oest", taller, "est");
-                connectar(oficina, "nord", comandaments, "sud");
-                connectar(oficina, "oest", vestuaris, "est");
+                connectar(dormitoris, "NORD", passadis, "SUD");
+                connectar(dormitoris, "SUD", esclusa, "NORD");
+                connectar(passadis, "NORD", oficina, "SUD");
+                connectar(passadis, "EST", cuina, "OEST");
+                connectar(passadis, "OEST", taller, "EST");
+                connectar(oficina, "NORD", comandaments, "SUD");
+                connectar(oficina, "OEST", vestuaris, "EST");
                 connectar(oficina, "EST", infermeria, "OEST");
                 connectar(cuina, "EST", magatzem, "OEST");
                 connectar(esclusa, "SUD", motors, "NORD");
@@ -102,6 +102,103 @@ public class Main {
                 System.out.println("         pero hem xocat amb un aerolit i els propulsors estan tocats.");
                 System.out.println();
                 System.out.println("Escriu AJUDA per veure les ordres.");
+        }
+
+        private void mostrarAjuda() {
+                System.out.println();
+                System.out.println("--- ORDRES ---");
+                System.out.println(" ANAR <direccio>   (NORD, SUD, EST, OEST)");
+                System.out.println(" MIRAR             torna a descriure la zona");
+                System.out.println(" AJUDA             aquesta llista");
+                System.out.println(" SORTIR            acaba el joc");
+                System.out.println();
+                System.out.println("--- ZONES DE LA NAU ---");
+
+                for (int i = 0; i < zones.length; i++) {
+                        System.out.println(" " + zones[i].getNom() + " (sortides: " + zones[i].getSortidesText() + ")");
+                }
+        }
+
+        public void mostrarDescripcioZona() {
+                jugador.getZonaActual().mostrarDescripcio();
+        }
+
+        public void processarOrdre(String text) {
+                String[] parts = text.trim().split(" ");
+                String verb = parts[0].toUpperCase();
+                String complement = "";
+
+                if (parts.length > 1) {
+                        complement = parts[1].toUpperCase();
+                }
+
+                if (esDireccio(verb)) {
+                        anar(verb);
+                        return;
+                }
+
+                if (verb.equals("ANAR")) {
+                        anar(complement);
+                } else if (verb.equals("MIRAR")) {
+                        mostrarDescripcioZona();
+                } else if (verb.equals("AJUDA")) {
+                        mostrarAjuda();
+                } else if (verb.equals("SORTIR")) {
+                        System.out.println("Abandones la missio. La PiaXXII es perd per sempre a l'espai...");
+                        finalitzat = true;
+                } else if (verb.equals("")) {
+                        System.out.println("No has escrit res, capita.");
+                } else {
+                        System.out.println("No entenc la paraula " + verb + ". Escriu AJUDA per veure les ordres.");
+                }
+        }
+
+        private void anar(String direccio) {
+                if (direccio.equals("")) {
+                        System.out.println("Cap a on vols anar? (NORD, SUD, EST, OEST)");
+                        return;
+                }
+
+                if (!esDireccio(direccio)) {
+                        System.out.println("Nomes pots anar cap al NORD, SUD, EST o OEST.");
+                        return;
+                }
+
+                direccio = direccioCompleta(direccio);
+                Zona desti = jugador.getZonaActual().getSortida(direccio);
+
+                if (desti == null) {
+                        System.out.println("Per aqui no hi ha cap sortida.");
+                        System.out.println("Sortides: " + jugador.getZonaActual().getSortidesText());
+                        return;
+                }
+
+                jugador.moure(desti);
+                System.out.println("Camines cap al " + direccio + "...");
+                mostrarDescripcioZona();
+        }
+
+        private boolean esDireccio(String text) {
+                return text.equals("NORD") || text.equals("SUD")
+                                || text.equals("EST") || text.equals("OEST")
+                                || text.equals("N") || text.equals("S")
+                                || text.equals("E") || text.equals("O");
+        }
+
+        private String direccioCompleta(String text) {
+                if (text.equals("N")) {
+                        return "NORD";
+                }
+                if (text.equals("S")) {
+                        return "SUD";
+                }
+                if (text.equals("E")) {
+                        return "EST";
+                }
+                if (text.equals("O")) {
+                        return "OEST";
+                }
+                return text;
         }
 
 }
