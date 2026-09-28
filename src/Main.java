@@ -179,11 +179,12 @@ public class Main {
         }
 
         private boolean esDireccio(String text) {
-                return text.equals("NORD") || text.equals("SUD")
-                                || text.equals("EST") || text.equals("OEST")
-                                || text.equals("N") || text.equals("S")
-                                || text.equals("E") || text.equals("O");
-        }
+        text = text.toUpperCase();
+        return text.equals("NORD") || text.equals("SUD")
+            || text.equals("EST") || text.equals("OEST")
+            || text.equals("N") || text.equals("S")
+            || text.equals("E") || text.equals("O");
+}
 
         private String direccioCompleta(String text) {
                 if (text.equals("N")) {
