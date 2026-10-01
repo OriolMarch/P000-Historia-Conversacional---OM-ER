@@ -22,8 +22,16 @@ public class Main {
 
                 while (!comprovarFinalJoc()) {
                         System.out.print("\n> ");
-                        String ordre = teclat.nextLine();
-                        processarOrdre(ordre);
+
+                        /* Es comprova abans de llegir perque, si l'entrada s'acaba (Ctrl+Z,
+                           Ctrl+D o un fitxer redirigit), nextLine() llanca
+                           NoSuchElementException i el joc petava. */
+                        if (teclat.hasNextLine()) {
+                                String ordre = teclat.nextLine();
+                                processarOrdre(ordre);
+                        } else {
+                                finalitzat = true;
+                        }
                 }
 
                 System.out.println();
@@ -45,7 +53,7 @@ public class Main {
                 Zona comandaments = new Zona(4, "Sala de Comandaments",
                                 "Pantalles, botons i una gran placa vermella per engegar motors.");
                 Zona vestuaris = new Zona(5, "Vestuaris",
-                                "Armariets oberts i bancs. Hi ha un vestit espacial penjat d'un ganxo.");
+                                "Armariets oberts i bancs, i una fila de ganxos per penjar els vestits espacials.");
                 Zona infermeria = new Zona(6, "Infermeria",
                                 "Lliteres fetes i una farmaciola buida. Fa una olor estranya, com de peix.");
                 Zona taller = new Zona(7, "Taller",
@@ -83,6 +91,19 @@ public class Main {
                 connectar(cuina, "EST", magatzem, "OEST");
                 connectar(esclusa, "SUD", motors, "NORD");
 
+                taller.afegirObjecte(new Objecte("EINA",
+                                "Una eina especial per reparar els propulsors.", true));
+                vestuaris.afegirObjecte(new Objecte("VESTIT",
+                                "Un vestit espacial. Sense ell no sobreviuries fora de la nau.", true));
+                oficina.afegirObjecte(new Objecte("TARJA",
+                                "La teva tarja identificadora. Obre les portes de la nau.", true));
+                oficina.afegirObjecte(new Objecte("CALAIX",
+                                "El calaix d'un escriptori.", false));
+                cuina.afegirObjecte(new Objecte("DONUTS",
+                                "Una capsa de donuts. Diuen que al Malien li encanten.", true));
+                motors.afegirObjecte(new Objecte("PROPULSORS",
+                                "Els propulsors de la nau, malmesos per l'aerolit.", false));
+
                 jugador = new Jugador("Bond", dormitoris);
 
         }
@@ -109,6 +130,9 @@ public class Main {
                 System.out.println("--- ORDRES ---");
                 System.out.println(" ANAR <direccio>   (NORD, SUD, EST, OEST)");
                 System.out.println(" MIRAR             torna a descriure la zona");
+                System.out.println(" AGAFAR <objecte>  posa un objecte de la zona a la motxilla");
+                System.out.println(" DEIXAR <objecte>  deixa un objecte de la motxilla a la zona");
+                System.out.println(" INVENTARI         mostra el que portes a la motxilla");
                 System.out.println(" AJUDA             aquesta llista");
                 System.out.println(" SORTIR            acaba el joc");
                 System.out.println();
@@ -124,12 +148,15 @@ public class Main {
         }
 
         public void processarOrdre(String text) {
-                String[] parts = text.trim().split(" ");
+                /* "\\s+" i no " ": amb split(" "), "anar  nord" (dos espais) donava una
+                   part buida i el joc preguntava cap a on vols anar. El limit 2 deixa al
+                   complement tota la resta de la frase ("la tarja", "el vestit"...). */
+                String[] parts = text.trim().split("\\s+", 2);
                 String verb = parts[0].toUpperCase();
                 String complement = "";
 
                 if (parts.length > 1) {
-                        complement = parts[1].toUpperCase();
+                        complement = parts[1].replaceAll("\\s+", " ").toUpperCase();
                 }
 
                 if (esDireccio(verb)) {
@@ -141,6 +168,12 @@ public class Main {
                         anar(complement);
                 } else if (verb.equals("MIRAR")) {
                         mostrarDescripcioZona();
+                } else if (verb.equals("AGAFAR")) {
+                        agafar(complement);
+                } else if (verb.equals("DEIXAR")) {
+                        deixar(complement);
+                } else if (verb.equals("INVENTARI")) {
+                        jugador.getMotxilla().mostrarContingut();
                 } else if (verb.equals("AJUDA")) {
                         mostrarAjuda();
                 } else if (verb.equals("SORTIR")) {
@@ -176,6 +209,66 @@ public class Main {
                 jugador.moure(desti);
                 System.out.println("Camines cap al " + direccio + "...");
                 mostrarDescripcioZona();
+        }
+
+        private void agafar(String complement) {
+                String nom = treureArticle(complement);
+
+                if (nom.equals("")) {
+                        System.out.println("Que vols agafar?");
+                        return;
+                }
+
+                Objecte obj = jugador.getZonaActual().buscarObjecte(nom);
+
+                if (obj == null) {
+                        if (jugador.getMotxilla().buscar(nom) != null) {
+                                System.out.println("Ja portes " + nom + " a la motxilla.");
+                        } else {
+                                System.out.println("Aqui no hi ha cap " + nom + ".");
+                        }
+                        return;
+                }
+
+                if (!obj.isAgafable()) {
+                        System.out.println("No pots agafar " + nom + ".");
+                        return;
+                }
+
+                jugador.agafar(obj);
+                System.out.println("Has agafat " + nom + ".");
+        }
+
+        private void deixar(String complement) {
+                String nom = treureArticle(complement);
+
+                if (nom.equals("")) {
+                        System.out.println("Que vols deixar?");
+                        return;
+                }
+
+                Objecte obj = jugador.getMotxilla().buscar(nom);
+
+                if (obj == null) {
+                        System.out.println("No portes cap " + nom + " a la motxilla.");
+                        return;
+                }
+
+                jugador.deixar(obj);
+                System.out.println("Has deixat " + nom + " a " + jugador.getZonaActual().getNom() + ".");
+        }
+
+        /* Perque "agafar l'eina" o "deixar el vestit" funcionin igual que
+           "agafar eina": els noms dels objectes es guarden sense article. */
+        private String treureArticle(String text) {
+                String[] articles = {"L'", "EL ", "LA ", "ELS ", "LES "};
+
+                for (int i = 0; i < articles.length; i++) {
+                        if (text.startsWith(articles[i])) {
+                                return text.substring(articles[i].length());
+                        }
+                }
+                return text;
         }
 
         private boolean esDireccio(String text) {

@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Zona {
 
@@ -6,12 +8,14 @@ public class Zona {
     private String nom;
     private String descripcio;
     private HashMap<String, Zona> sortides;
+    private List<Objecte> objectes;
 
     public Zona(int id, String nom, String descripcio) {
         this.id = id;
         this.nom = nom;
         this.descripcio = descripcio;
         this.sortides = new HashMap<String, Zona>();
+        this.objectes = new ArrayList<>();
     }
 
     public int getId() {
@@ -54,10 +58,44 @@ public class Zona {
         return text;
     }
 
+    public void afegirObjecte(Objecte obj) {
+        objectes.add(obj);
+    }
+
+    public void treureObjecte(Objecte obj) {
+        objectes.remove(obj);
+    }
+
+    public Objecte buscarObjecte(String nom) {
+        for (Objecte obj : objectes) {
+            if (obj.getNom().equalsIgnoreCase(nom)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    public String getObjectesText() {
+        String text = "";
+
+        for (Objecte obj : objectes) {
+            if (text.equals("")) {
+                text = obj.getNom();
+            } else {
+                text = text + ", " + obj.getNom();
+            }
+        }
+        return text;
+    }
+
     public void mostrarDescripcio() {
         System.out.println();
         System.out.println("=== " + nom + " ===");
         System.out.println(descripcio);
+
+        if (!objectes.isEmpty()) {
+            System.out.println("Objectes: " + getObjectesText());
+        }
         System.out.println("Sortides: " + getSortidesText());
     }
 }
