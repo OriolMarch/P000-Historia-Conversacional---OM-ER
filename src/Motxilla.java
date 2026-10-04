@@ -1,9 +1,8 @@
 import java.util.ArrayList;
-import java.util.List;
 
 public class Motxilla {
 
-    private List<Objecte> objectes;
+    private ArrayList<Objecte> objectes;
 
     public Motxilla() {
         this.objectes = new ArrayList<>();
@@ -17,26 +16,25 @@ public class Motxilla {
         objectes.remove(obj);
     }
 
+    public boolean conte(Objecte obj) {
+        return objectes.contains(obj);
+    }
+
     public Objecte buscar(String nom) {
         for (Objecte obj : objectes) {
-            if (obj.getNom().equalsIgnoreCase(nom)) {
+            if (obj.getNom().equals(nom)) {
                 return obj;
             }
         }
         return null;
     }
 
-    public boolean esBuida() {
-        return objectes.isEmpty();
-    }
-
     public void mostrarContingut() {
         System.out.println();
         System.out.println("--- MOTXILLA ---");
 
-        if (esBuida()) {
+        if (objectes.isEmpty()) {
             System.out.println(" La motxilla es buida.");
-            return;
         }
 
         for (Objecte obj : objectes) {

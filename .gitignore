@@ -1,1 +1,14 @@
 contmain.java
+
+# Fitxers compilats
+*.class
+bin/
+out/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.settings/
+.project
+.classpath
